@@ -42,7 +42,7 @@ const uploadToCloud = async (file, res) => {
 //find all post
 /**
  * @swagger
- * /post/post:
+ * /post:
  *   get:
  *     tags:
  *       - Blogs
@@ -65,18 +65,47 @@ router.get("/", async (req, res) => {
     res.json({ message: err });
   }
 });
+
+
 //creating posts
+
 /**
  * @swagger
- *
- * /post/post:
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *   responses:
+ *     UnauthorizedError:
+ *       description: Unauthorized access error
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ *                 example: Unauthorized access
+ *   schemas:
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           example: An error occurred
+ *         details:
+ *           type: string
+ *           example: Error details here
+ * /post:
  *   post:
- *     tags: [Blogs]
- *     description: Creates a new post
+ *     summary: Create a new post
+ *     tags:
+ *       - Blogs
  *     security:
  *       - bearerAuth: []
  *     requestBody:
- *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
@@ -89,20 +118,53 @@ router.get("/", async (req, res) => {
  *               image:
  *                 type: string
  *                 format: binary
+ *             required:
+ *               - title
+ *               - description
+ *               - image
  *     responses:
  *       200:
- *         description: Successfully created post
+ *         description: A new post has been created
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
  *                 message:
- *                   type:
+ *                   type: string
+ *                   example: success
+ *                 post:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: 6130f13415e3d229d8477d55
+ *                     title:
+ *                       type: string
+ *                       example: My first post
+ *                     description:
+ *                       type: string
+ *                       example: This is my first blog post.
+ *                     image:
+ *                       type: string
+ *                       example: https://res.cloudinary.com/my-cloud-name/image/upload/v123456789/my-image-file-name.jpg
+ *                     date:
+ *                       type: string
+ *                       example: 2023-02-19T14:40:30.905Z
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
+
 router.post("/", Authorization, upload.single("image"), async (req, res) => {
   try {
     const result = await uploadToCloud(req.file, res);
+    console.log(result.secure_url);
     const post = await Post.create({
       title: req.body.title,
       description: req.body.description,

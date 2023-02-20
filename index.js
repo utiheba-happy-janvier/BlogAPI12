@@ -38,7 +38,7 @@ mongoose
 // };
 
 // app.use(cors(corsOptions));
- const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerJsdoc = require("swagger-jsdoc");
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -72,7 +72,7 @@ const options = {
     ],
     servers: [
       {
-        url: "https://myblog-qkx4.onrender.com",
+        url: "http://localhost:4000",
       },
     ],
   },
@@ -91,5 +91,5 @@ app.use("/post", postRoute);
 app.use("/comment", commentRoute);
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapiSpecification));
 app.listen(process.env.PORT || 3003, () =>
-  console.log("server up and running")
+  console.log("server up and running on port: " + process.env.PORT)
 );
